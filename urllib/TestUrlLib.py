@@ -45,8 +45,11 @@ class learnUrlLib(object):
         print(response.read().decode('utf-8'))
     # 带有权限认证
     def urllibBaseAuthHandler(self):
-        P = urllib.request.HTTPPasswordMgrWithDefaultRealm
-        P.add_password(None, "https://www.baidu.com", "dt", '123456')
+        p = urllib.request.HTTPPasswordMgrWithDefaultRealm()
+        uri = "https://www.baidu.com"
+        userName = "dt"
+        passwd = "123"
+        p.add_password(None, uri, userName, passwd)
         auth = urllib.request.HTTPBasicAuthHandler(p)
         open = urllib.request.build_opener(auth)
         try:

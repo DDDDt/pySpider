@@ -1,6 +1,7 @@
 import urllib.request
 import urllib.parse
 import ssl
+import http.cookiejar
 class learnUrlLib(object):
     def __init__(self):
         # 取消 ssl 验证
@@ -58,10 +59,35 @@ class learnUrlLib(object):
             print(html)
         except urllib.request.URLError as e:
             print(e.reason)
+    # 使用代理
+    def urllibProxyHandler(self):
+        proxy_handler = urllib.request.ProxyHandler({
+            "http":"http://127.0.0.1:8080",
+            "https":"http://127.0.0.1:8080"
+        })
+        opener = urllib.request.build_opener(proxy_handler)
+        try:
+            response = opener.open('https://www.baidu.com')
+            print(response.read().decode('utf-8'))
+        except urllib.request.URLError as e:
+            print(e)
+
+    # 获取 cookie
+    def getCookie(self):
+        cookie = http.cookiejar.CookieJar()
+        cookHandler = urllib.request.HTTPCookieProcessor(cookie)
+        opencer = urllib.request.build_opener(cookHandler)
+        response = opencer.open('https://www.baidu.com')
+        print(response)
+        for coo in cookie:
+            print(coo.name + ":" + coo.value)
+
 if __name__ == "__main__":
     lul = learnUrlLib()
     # lul.urlOpen()
     # lul.urlOpenDate()
     # lul.urllibRequest()
     # lul.urllibRequestHeader()
-    lul.urllibBaseAuthHandler()
+    # lul.urllibBaseAuthHandler()
+    # lul.urllibProxyHandler()
+    lul.getCookie()

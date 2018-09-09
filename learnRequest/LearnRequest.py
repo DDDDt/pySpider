@@ -1,4 +1,6 @@
 import requests
+from requests import Request
+from requests.auth import HTTPBasicAuth
 from requests.cookies import RequestsCookieJar
 
 
@@ -91,6 +93,50 @@ class learnRequest(object):
         r = session.get("http://httpbin.org/cookies")
         print(r.text)
 
+    # 取消 ssl
+    def isSssl(self):
+        rep = requests.get("http://www.12306.cn/mormhweb/",verify=False)
+        print(rep.status_code)
+
+    # 代理
+    def proxyHttp(self):
+        # 请使用可用代理
+        proxys = {
+            'http':'http://127.0.0.1:3128',
+            'https':'http://127.0.0.1:3128'
+        }
+        rep = requests.get("https://taobao.com",proxies=proxys)
+        print(rep.text)
+
+    # 设置超时时间
+    def timeOutHttp(self):
+        # 设置请求超时间
+        # rep = requests.get("https://taobao.com",timeout=1)
+        # 单独为请求和响应设置时间
+        rep = requests.get("https://taobao.com",timeout=(10,30))
+        print(rep.text)
+
+    # 身份认证
+    def baseAuth(self):
+        rep = requests.get("https://www.baidu.com",auth=HTTPBasicAuth('username','password'))
+        print(rep.text)
+
+    # 和 urllib 一样 设置 request 请求
+    def requestReq(self):
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.81 Safari/537.36"
+        }
+        paramData = {
+            "name": "dt",
+            "age": 15
+        }
+        url = 'http://httpbin.org/post'
+        req = Request('POST',url,data = paramData,headers = headers)
+        s = requests.Session()
+        pre = s.prepare_request(req)
+        rep = s.send(pre)
+        print(rep.text)
+
 if __name__ == "__main__":
     req = learnRequest()
     # req.requestGet()
@@ -100,5 +146,9 @@ if __name__ == "__main__":
     # req.fileReq()
     # req.getCookie()
     # req.setHeaderCookie()
-    req.setCookie()
+    # req.setCookie()
     # req.setSession()
+    # req.isSssl()
+    # req.proxyHttp()
+    # req.timeOutHttp()
+    req.requestReq()

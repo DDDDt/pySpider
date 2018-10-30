@@ -1,6 +1,6 @@
 # 免费的 ip 代理
 from typing import Optional
-
+from pyquery import PyQuery as pq
 import requests
 class IpSpider(object):
     # 爬取免费代理网站·
@@ -22,7 +22,14 @@ class IpSpider(object):
             return rep.text
         return None
 
+    def getIp(selfm,text: str):
+        html = pq(text)
+        # print(html)
+        table = html('#ip_list tr td')
+        print(table)
+
 if __name__ == "__main__":
     ipSpider = IpSpider()
     text = ipSpider.getSpiderHtml(1)
-    print(text)
+    # print(text)
+    ipSpider.getIp(text)

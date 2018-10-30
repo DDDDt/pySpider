@@ -25,8 +25,10 @@ class IpSpider(object):
     def getIp(selfm,text: str):
         html = pq(text)
         # print(html)
-        table = html('#ip_list tr td')
-        print(table)
+        table = html('#ip_list tr:gt(0)')
+        # print(table)
+        result = table.children('td').map(lambda i,x: print(pq(x).text()))
+
 
 if __name__ == "__main__":
     ipSpider = IpSpider()

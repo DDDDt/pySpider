@@ -21,17 +21,14 @@ class IpSpider(object):
         if rep.status_code == 200:
             return rep.text
         return None
-
-    def getIp(selfm,text: str):
+    # 解析 ip地址
+    def getIp(selfm,text: str) -> list:
         html = pq(text)
         # print(html)
         table = html('#ip_list tr:gt(0)')
         # print(table)
-        result = table.children('td').map(lambda i,x: print(pq(x).text()))
-
-
+        return table.children("td").text().split()
 if __name__ == "__main__":
     ipSpider = IpSpider()
     text = ipSpider.getSpiderHtml(1)
-    # print(text)
     ipSpider.getIp(text)

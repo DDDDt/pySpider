@@ -1,0 +1,11 @@
+# mariadb
+mariadb.host: 
+mariadb.port: 
+mariadb.username: 
+mariadb.password: 
+mariadb.mincached: 5
+mariadb.maxcached: 10
+mariadb.maxconnections: 20
+mariadb.blocking: False
+mariadb.maxshared: 19
+mariadb.db: 

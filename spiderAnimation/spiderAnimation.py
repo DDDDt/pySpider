@@ -33,7 +33,7 @@ class DmhyInfo(object):
 # 读取的数据存入 mongodb
 class addMongo(object):
     def getCon(self):
-        client = MongoClient('mongodb://172.25.39.67:27017/')
+        client = MongoClient('mongodb://:27017/')
         return client
     # 插入 相关信息
     def addMongoInfo(self):

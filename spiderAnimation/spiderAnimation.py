@@ -5,6 +5,7 @@ from pyquery import PyQuery as pq
 from pymongo import MongoClient
 import hashlib
 from pymongo import errors
+import time
 
 
 # 爬取动漫花园的数据类, 用语保存数据信息
@@ -35,20 +36,23 @@ class DmhyInfo:
         self.dataCreater = dataCreater
 
 headers = {
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36',
+        'Connection': 'close'
     }
 
 # 读取的数据存入 mongodb
 class AddMongo(object):
     def getCon(self):
-        client = MongoClient('mongodb://root:@:27017/admin')
+        client = MongoClient('mongodb://root:/admin')
         return client
-    # 插入 相关信息
+    # 插入 相关信息, -> 目前是同步, 以后可以改为异步
     def addMongoInfo(self,dmhyInfo: DmhyInfo) -> bool:
         bol = True
         client = self.getCon()
         try:
+            # 库
             db = client.pySpider
+            # 集合
             col = db.animation_info
             col.insert_one(dmhyInfo.__dict__)
         # 通过 id 判断有无重复
@@ -63,6 +67,9 @@ class AddMongo(object):
 class SpiderAnimation(object):
     ## 查询
     def getHtml(self,url: str,**headers) -> str:
+        requests.adapters.DEFAULT_RETRIES = 5
+        s = requests.session()
+        s.keep_alive = False
         req = requests.get(url,headers=headers)
         if req.status_code == 200:
             return req.text
@@ -73,11 +80,11 @@ class SpiderAnimation(object):
     def getResultHeml(self,trPq: pq) -> DmhyInfo:
         date = trPq('td:first span').text()
         dataType = trPq('td:eq(1) font').text()
-        dataName = trPq('td:eq(2) a').text()
+        dataName = trPq('td.title > a').text()
         dataUrl = trPq('td:eq(3) a').attr('href')
         if not dataUrl:
-            url = dataUrl = trPq('td:eq(2) a').attr('href')
-            dataUrl = self.getMagnet("https://www.dmhy.org/"+url)
+            url = trPq('td.title > a').attr('href')
+            dataUrl = self.getMagnet("https://www.dmhy.org"+url)
         dataSize = trPq('td:eq(4)').text()
         dataTor = trPq('td:eq(5)').text()
         dataDow = trPq('td:eq(6) span').text()
@@ -92,8 +99,8 @@ class SpiderAnimation(object):
     def getMagnet(self,url: str) -> str:
         html = self.getHtml(url,**headers)
         if not html:
-            print("未获取磁力链接")
-            return None
+            print("未获取磁力链接: "+url)
+            return ''
         pqHtml = pq(html)
         magnet = pqHtml("#a_magnet").text()
         return magnet
@@ -108,8 +115,12 @@ class SpiderAnimation(object):
 
 if __name__ == "__main__":
     spiderAnimation = SpiderAnimation()
-    pageNums = range(1,4448)
-    for pageNum in reversed(pageNums):
+    # 当前分页
+    pageNum = 1
+    # 阈值
+    sameCodeNum = 6
+    bol = True
+    while bol:
         html = spiderAnimation.getHtml("https://www.dmhy.org/topics/list/page/{0}".format(pageNum),**headers)
         if not html:
             print("https://www.dmhy.org/topics/list/page/{0} -> 为空".format(pageNum))
@@ -117,11 +128,20 @@ if __name__ == "__main__":
         result = spiderAnimation.getRegexHtml(html)
         if not result:
             print("{0}为空".format(pageNum))
+            bol = False
+            pageNum+=1
+            break
         else:
+            sameCodeErrorNum = 0
             mongo = AddMongo()
             for i in result:
+                sameCodeErrorNum += 1
                 bol = mongo.addMongoInfo(i)
                 if not bol:
-                    break
+                    if sameCodeNum < sameCodeErrorNum:
+                        break
         print("完成 -> {0}".format(pageNum))
+        pageNum+=1
+        # 做人要良心, 就算单线程爬, 也不能影响别人
+        time.sleep(10)
             

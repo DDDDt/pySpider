@@ -27,7 +27,7 @@ class KafkaUtils(object):
 
     # 得到 kafka 消费者
     def getKafkaConsumer(self) -> KafkaConsumer:
-        comsumer = KafkaConsumer('bigdata-marketing-user',group_id = 'test-dt-group',bootstrap_servers=[])        
+        comsumer = KafkaConsumer('',group_id = 'test-dt-group',bootstrap_servers=[])
         return comsumer
     # 保存到 mysql 
     def save_mysql(self,usersvalues: list):

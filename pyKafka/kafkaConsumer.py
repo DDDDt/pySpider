@@ -28,7 +28,7 @@ class KafkaUtils(object):
 
     # 得到 kafka 消费者
     def getKafkaConsumer(self) -> KafkaConsumer:
-        comsumer = KafkaConsumer('bigdata-marketing-user',group_id = 'test-jy-group',bootstrap_servers=[])        
+        comsumer = KafkaConsumer('',group_id = 'test-jy-group',bootstrap_servers=[])
         return comsumer
 
     def write_excel(self,path):            # path
